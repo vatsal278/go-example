@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -43,27 +44,61 @@ func ValidCredentials(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(errs)
 		return
 	} else {
-		json.NewEncoder(w).Encode("Bearer token is : E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q")
+		cookieValue := "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q"
+		addCookie(w, "cookie", cookieValue, 30*time.Minute)
+		//json.NewEncoder(w).Encode("Bearer token is : E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q")
 	}
 
 }
 
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie := r.Cookies()
-
-		ck := fmt.Sprint(cookie)
-		ckk := strings.Split(ck, "Cookie_1=")
-		ckkk := strings.Split(ckk[1], "]")
-
-		if ckkk[0] == "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q" {
-			fmt.Print("token matched")
+		if VerifyToken(r) == true {
 			next.ServeHTTP(w, r)
 		} else {
 			log.Fatal()
 		}
+
+		//cookie := r.Cookies()
+
+		//ck := fmt.Sprint(cookie)
+		//ckk := strings.Split(ck, "Cookie_1=")
+		//ckkk := strings.Split(ckk[1], "]")
+
+		//if ckkk[0] == "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q" {
+		//	fmt.Print("token matched")
+		//	next.ServeHTTP(w, r)
+		//} else {
+		//	log.Fatal()
+		//}
 		//ckk := strings.TrimPrefix(ck, "Cookie_1=")
 		//fmt.Print(ckk)
 
 	})
+}
+
+func addCookie(w http.ResponseWriter, name, value string, ttl time.Duration) {
+	expire := time.Now().Add(ttl)
+	cookie := http.Cookie{
+		Name:    name,
+		Value:   value,
+		Expires: expire,
+	}
+	http.SetCookie(w, &cookie)
+}
+
+func VerifyToken(r *http.Request) bool {
+
+	reqToken := r.Header.Get("Authorization")
+	//fmt.Print(reqToken)
+	token := strings.Split(reqToken, " ")
+	fmt.Print(token[1])
+
+	if token[1] == "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q" {
+		fmt.Println("valid token")
+		return true
+	} else {
+		fmt.Println("invalid token")
+		return false
+	}
 }
