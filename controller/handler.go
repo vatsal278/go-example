@@ -119,13 +119,15 @@ func GetbyAuthor(w http.ResponseWriter, r *http.Request) {
 
 func GetByTitle(w http.ResponseWriter, r *http.Request) {
 	title, ok := r.URL.Query()["title"]
+	fmt.Print(title)
 	if !ok {
-		fmt.Print()
+		fmt.Print("error fetching params")
 	}
 	for _, j := range Books {
 		if j.Title == title[0] {
 			fmt.Printf("%s ", j.Title)
 			json.NewEncoder(w).Encode(j.Title)
+
 		}
 	}
 }
