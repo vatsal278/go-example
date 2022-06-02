@@ -41,7 +41,7 @@ func ValidCredentials(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	errs := validate.Struct(userDetails)
 	if errs != nil {
-		fmt.Println(errs)
+		http.Error(w, errs.Error(), http.StatusBadRequest)
 		return
 	} else {
 		cookieValue := "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q"
@@ -53,10 +53,10 @@ func ValidCredentials(w http.ResponseWriter, r *http.Request) {
 
 func Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if VerifyToken(r) == true {
+		if VerifyToken(r) {
 			next.ServeHTTP(w, r)
 		} else {
-			log.Fatal()
+			http.Error(w, "Invalid Token", http.StatusUnauthorized)
 		}
 
 		//cookie := r.Cookies()
@@ -101,7 +101,7 @@ func VerifyToken(r *http.Request) bool {
 		fmt.Println("valid token")
 		return true
 	} else {
-		fmt.Println("invalid token")
+		fmt.Println("invalid token", http.StatusUnauthorized)
 		return false
 	}
 }
@@ -121,7 +121,7 @@ func GetByTitle(w http.ResponseWriter, r *http.Request) {
 	title, ok := r.URL.Query()["title"]
 	fmt.Print(title)
 	if !ok {
-		fmt.Print("error fetching params")
+		fmt.Print("error fetching params ", http.StatusBadRequest)
 	}
 	for _, j := range Books {
 		if j.Title == title[0] {
