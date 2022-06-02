@@ -40,6 +40,6 @@ func main() {
 	log.Print("started server")
 
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Print(503, err.Error())
 	}
 }
