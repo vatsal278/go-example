@@ -22,8 +22,10 @@ func Middleware(h http.Handler) http.Handler {
 
 func main() {
 	controller.Books = []controller.Book{
-		{Title: "Book 1", Author: "Author 1"},
-		{Title: "Book 2", Author: "Author 2"},
+		{Title: "Book1", Author: "Author 1"},
+		{Title: "Book2", Author: "Author 2"},
+		{Title: "Book 3", Author: "Author 2"},
+		{Title: "Book 4", Author: "Author 1"},
 	}
 
 	mux := http.NewServeMux()
@@ -31,6 +33,8 @@ func main() {
 	mux.HandleFunc("/validate", controller.ValidCredentials)
 
 	mux.Handle("/allbooks", controller.Middleware(http.HandlerFunc(controller.AllBooks)))
+	mux.Handle("/author", controller.Middleware(http.HandlerFunc(controller.GetbyAuthor)))
+	mux.Handle("/title", controller.Middleware(http.HandlerFunc(controller.GetByTitle)))
 
 	err := http.ListenAndServe(":8080", mux)
 	log.Print("started server")

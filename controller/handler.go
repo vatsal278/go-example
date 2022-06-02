@@ -92,13 +92,40 @@ func VerifyToken(r *http.Request) bool {
 	reqToken := r.Header.Get("Authorization")
 	//fmt.Print(reqToken)
 	token := strings.Split(reqToken, " ")
+	if len(token) != 2 {
+		return false
+	}
 	fmt.Print(token[1])
 
-	if token[1] == "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q" {
+	if token[(len(token)-1)] == "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q" {
 		fmt.Println("valid token")
 		return true
 	} else {
 		fmt.Println("invalid token")
 		return false
+	}
+}
+
+func GetbyAuthor(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("params were:", r.URL.Query())
+	authorName := r.URL.Query().Get("author")
+	for _, j := range Books {
+		if authorName == j.Author {
+			fmt.Printf("%s ", j.Title)
+			json.NewEncoder(w).Encode(j.Title)
+		}
+	}
+}
+
+func GetByTitle(w http.ResponseWriter, r *http.Request) {
+	title, ok := r.URL.Query()["title"]
+	if !ok {
+		fmt.Print()
+	}
+	for _, j := range Books {
+		if j.Title == title[0] {
+			fmt.Printf("%s ", j.Title)
+			json.NewEncoder(w).Encode(j.Title)
+		}
 	}
 }
