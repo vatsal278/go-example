@@ -41,12 +41,18 @@ func ValidCredentials(w http.ResponseWriter, r *http.Request) {
 	validate := validator.New()
 	errs := validate.Struct(userDetails)
 	if errs != nil {
-		http.Error(w, errs.Error(), http.StatusBadRequest)
-		return
-	} else {
+		http.Error(w, "invalid email or password", http.StatusUnauthorized)
+	}
+	staticmail := "vatsal@gmail.com"
+	staticpass := "vatsal1"
+	if errs == nil && userDetails.Email == staticmail && userDetails.Password == staticpass {
 		cookieValue := "E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q"
 		addCookie(w, "cookie", cookieValue, 30*time.Minute)
 		//json.NewEncoder(w).Encode("Bearer token is : E8hxQS4FGHiB0qV0ShW__zqaScbTdyK18Kda8Lsu39K4mlP6EbvumaYqgFCDLMrepGuSypcf1O01P-o8m7bz1Q")
+		return
+	} else {
+		http.Error(w, errs.Error(), http.StatusBadRequest)
+
 	}
 
 }
