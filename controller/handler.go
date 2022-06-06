@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -19,6 +20,7 @@ type Book struct {
 var Books []Book
 
 func AllBooks(w http.ResponseWriter, r *http.Request) {
+	r.Method = http.MethodGet
 	log.Println("Endpoint Hit: returnAllArticles")
 	fmt.Printf("%+v", Books)
 	json.NewEncoder(w).Encode(Books)
@@ -113,6 +115,7 @@ func VerifyToken(r *http.Request) bool {
 }
 
 func GetbyAuthor(w http.ResponseWriter, r *http.Request) {
+	r.Method = http.MethodGet
 	fmt.Println("params were:", r.URL.Query())
 	authorName := r.URL.Query().Get("author")
 	for _, j := range Books {
@@ -124,16 +127,26 @@ func GetbyAuthor(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetByTitle(w http.ResponseWriter, r *http.Request) {
-	title, ok := r.URL.Query()["title"]
-	fmt.Print(title)
-	if !ok {
-		fmt.Print("error fetching params ", http.StatusBadRequest)
-	}
-	for _, j := range Books {
-		if j.Title == title[0] {
-			fmt.Printf("%s ", j.Title)
-			json.NewEncoder(w).Encode(j.Title)
+	r.Method = http.MethodGet
+	//title := r.URL.Path
+	log.Print(r.URL.Path)
 
-		}
-	}
+	//for _, j := range Books {
+	//	if j.Title == title {
+	//		fmt.Printf("%s ", j.Title)
+	//		json.NewEncoder(w).Encode(j.Title)
+	//
+	//		}
+	//	}
+}
+
+func AddBook(w http.ResponseWriter, r *http.Request) {
+	r.Method = http.MethodPost
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	//fmt.Fprintf(w, "%+v", string(reqBody))
+	var books Book
+	json.Unmarshal(reqBody, &books)
+	Books = append(Books, books)
+
+	json.NewEncoder(w).Encode(Books)
 }
