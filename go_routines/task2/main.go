@@ -6,18 +6,27 @@ import (
 	"sync"
 )
 
+var y int64
+
 func main() {
-	var y int64
+	var m sync.Mutex
 	var wg sync.WaitGroup
-	for i := 0; i < 5; i++ {
+
+	for i := 0; i <= 20; i++ {
+
 		wg.Add(1)
-		go func() {
-			for c := 0; c < 10; c++ {
+		//fmt.Println("goroutine ", i)
+
+		go func(wg *sync.WaitGroup, m *sync.Mutex) {
+			for c := 0; c < 5000; c++ {
+				m.Lock()
 				y = y + 1
 				log.Print(y)
+				m.Unlock()
 			}
 			wg.Done()
-		}()
+		}(&wg, &m)
+
 	}
 
 	wg.Wait()
